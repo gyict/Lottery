@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=0.5">
+<title>中科天合公司年会抽奖</title>
+
+<link href="css/style.css" rel="stylesheet" type="text/css">
+<div class="tit">中科天合公司年会抽奖</div>
+<script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="js/awardRotate.js"></script>
+
+<script type="text/javascript">
+var turnplate={
+		restaraunts:[],				//大转盘奖品名称
+		colors:[],					//大转盘奖品区块对应背景颜色
+		outsideRadius:192,			//大转盘外圆的半径
+		textRadius:155,				//大转盘奖品位置距离圆心的距离
+		insideRadius:68,			//大转盘内圆的半径
+		startAngle:117,				//开始角度
+		bRotate:false				//false:停止;ture:旋转
+}
+
+var t=new Date().getTime()
+var shown=new Array();
+$(document).ready(function(){
+	//动态添加大转盘的奖品与奖品区域背景颜色
+	turnplate.restaraunts = [ "陈海明老师", "石海龙老师","赵泽老师", "崔莉老师", "黄希老师", "肖亚楠老师","李栋老师", "代培林工程师", "王鑫工程师", "孙恒博工程师", "张玉同秘书", "李勐 ", "黄晓辉", "王娜娜", "王念", "章静蕾 ", "杜日鹏", "袁长田", "刘文卿", "彭政红", "高源 ", "孙明亮", "黄斌", "宋磊", "江涛", "郑烨 ", "张兆年"];
+	turnplate.colors = ["#FFF4D6", "#FFFFFF", "#f5e0cc","#FFF4D6", "#FFFFFF", "#f5e0cc","#FFF4D6", "#FFFFFF", "#f5e0cc", "#FFF4D6", "#FFFFFF", "#f5e0cc","#FFF4D6", "#FFFFFF", "#f5e0cc","#FFF4D6", "#FFFFFF", "#f5e0cc","#FFF4D6", "#FFFFFF", "#f5e0cc","#FFF4D6", "#FFFFFF", "#f5e0cc","#FFF4D6", "#FFFFFF", "#f5e0cc"];
+
+	
+	var rotateTimeOut = function (){
+		$('#wheelcanvas').rotate({
+			angle:0,
+			animateTo:2160,
+			duration:8000,
+			callback:function (){
+				alert('网络超时，请检查您的网络设置！');
+			}
+		});
+	};
+
+	//旋转转盘 item:奖品位置; txt：提示语;
+	var rotateFn = function (item, txt){
+		var angles = item * (360 / turnplate.restaraunts.length) - (360 / (turnplate.restaraunts.length*2));
+		angles-=133;
+		if(angles<270){
+			angles = 270 - angles; 
+		}else{
+			angles = 360 - angles + 270;
+		}
+		$('#wheelcanvas').stopRotate();
+		$('#wheelcanvas').rotate({
+			angle:0,
+			animateTo:angles+1800,
+			duration:8000,
+			callback:function (){
+				alert(txt);
+				turnplate.bRotate = !turnplate.bRotate;
+			}
+		});
+	};
+
+	$('.pointer').click(function (){
+		if(turnplate.bRotate)return;
+		turnplate.bRotate = !turnplate.bRotate;
+		//获取随机数(奖品个数范围内)
+		var item = rnd(1,turnplate.restaraunts.length);
+		rotateFn(item, turnplate.restaraunts[item-1]);
+
+		console.log(item);
+	});
+});
+
+function rnd(n, m){
+	var k=Math.random()*t;
+	console.log(k);
+	t=new Date().getTime();
+	k=k/t;
+	console.log(k);
+	var random = Math.floor(k*(m-n+1)+n);
+	
+	while(shown.indexOf(random)!=-1){
+		random=(random+Math.floor(Math.random()*(m-n+1)+n))%m;
+	}
+	shown.push(random);
+	console.log(shown);
+	return random;
+	
+}
+
+/*Math.seed = function(s) {
+    var m_w  = s;
+    var m_z  = 987654321;
+    var mask = 0xffffffff;
+
+    return function() {
+      m_z = (36969 * (m_z & 65535) + (m_z >> 16)) & mask;
+      m_w = (18000 * (m_w & 65535) + (m_w >> 16)) & mask;
+
+      var result = ((m_z << 16) + m_w) & mask;
+      result /= 4294967296;
+
+      return result + 0.5;
+    }
+}*/
+//页面所有元素加载完毕后执行drawRouletteWheel()方法对转盘进行渲染
+window.onload=function(){
+	drawRouletteWheel();
+};
+
+function drawRouletteWheel() {    
+  var canvas = document.getElementById("wheelcanvas");    
+  if (canvas.getContext) {
+	  //根据奖品个数计算圆周角度
+	  var arc = Math.PI / (turnplate.restaraunts.length/2);
+	  var ctx = canvas.getContext("2d");
+	  //在给定矩形内清空一个矩形
+	  ctx.clearRect(0,0,422,422);
+	  //strokeStyle 属性设置或返回用于笔触的颜色、渐变或模式  
+	  ctx.strokeStyle = "#FFBE04";
+	  //font 属性设置或返回画布上文本内容的当前字体属性
+	  ctx.font = '12px Microsoft YaHei';      
+	  for(var i = 0; i < turnplate.restaraunts.length; i++) {       
+		  var angle = turnplate.startAngle + i * arc;
+		  ctx.fillStyle = turnplate.colors[i];
+		  ctx.beginPath();
+		  //arc(x,y,r,起始角,结束角,绘制方向) 方法创建弧/曲线（用于创建圆或部分圆）    
+		  ctx.arc(211, 211, turnplate.outsideRadius, angle, angle + arc, false);    
+		  ctx.arc(211, 211, turnplate.insideRadius, angle + arc, angle, true);
+		  ctx.stroke();  
+		  ctx.fill();
+		  //锁画布(为了保存之前的画布状态)
+		  ctx.save();   
+		  
+		  //----绘制奖品开始----
+		  ctx.fillStyle = "#d6aeae";
+		  //var text = turnplate.restaraunts[i].split('').join('\n');
+		  var text = turnplate.restaraunts[i];
+		  //console.log(text);
+		  //var text = for(c in turnplate.restaraunts[i];
+		  var line_height = 17;
+		  //translate方法重新映射画布上的 (0,0) 位置
+		  ctx.translate(211 + Math.cos(angle + arc / 2) * turnplate.textRadius, 211 + Math.sin(angle + arc / 2) * turnplate.textRadius);
+		  
+		  //rotate方法旋转当前的绘图
+		  ctx.rotate(angle + arc / 2 + Math.PI / 2);
+		  
+		   /** 下面代码根据奖品类型、奖品名称长度渲染不同效果，如字体、颜色、图片效果。(具体根据实际情况改变) **/
+		   var lineWidth = 0;
+			var canvasWidth = 10;//计算canvas的宽度
+			var initHeight=-30;//绘制字体距离canvas顶部初始的高度
+			var lastSubStrIndex= 0; //每次开始截取的字符串的索引
+			for(let i=0;i<text.length;i++){ 
+			    lineWidth+=ctx.measureText(text[i]).width; 
+			    if(lineWidth>canvasWidth){  
+			        ctx.fillText(text.substring(lastSubStrIndex,i),-ctx.measureText(text.substring(lastSubStrIndex,i)).width / 2,initHeight);//绘制截取部分
+			        initHeight+=18;//20为字体的高度
+			        lineWidth=0;
+			        lastSubStrIndex=i;
+			    } 
+			    if(i==text.length-1){//绘制剩余部分
+			        ctx.fillText(text.substring(lastSubStrIndex,i+1),-ctx.measureText(text.substring(lastSubStrIndex,i+1)).width / 2,initHeight);
+			    }
+			}
+		  //ctx.fillText(text, -ctx.measureText(text).width / 2, 0);
+		  //把当前画布返回（调整）到上一个save()状态之前 
+		  ctx.restore();
+		  //----绘制奖品结束----
+	  }     
+  } 
+}
+
+</script>
+</head>
+<body style="background:#e62d2d;overflow-x:hidden;">
+<br>
+
+<div><img src="./images/timg.png" class="lf"></div>
+<div class="banner">
+	
+	<div class="turnplate" style="background-image:url(images/turnplate-bg.png);background-size:100% 100%;">
+		<canvas class="item" id="wheelcanvas" width="422px" height="422px"></canvas>
+		<img class="pointer" src="images/turnplate-pointer.png" />
+	</div>
+	
+</div>
+<div><img src="./images/timg.png" class="rt"></div>
+<!-- 代码 结束 -->
+
+<!-- <div style="text-align:center;margin:20px 0; font:normal 14px/24px 'MicroSoft YaHei';">
+<p><script src="http://www.datouwang.com/img/js/demo_ad.js"></script><center style="display:none"><script src="http://www.datouwang.com/img/js/demo_tj.js"></script></center></p>
+</div> -->
+
+</body>
+</html>
